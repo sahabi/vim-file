@@ -16,11 +16,22 @@ Plugin 'jnurmine/Zenburn'
 Plugin 'altercation/vim-colors-solarized'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
+Plugin 'vim-pandoc/vim-pandoc-syntax'
+Plugin 'vim-pandoc/vim-pandoc'
 call vundle#end()            " required
 filetype plugin indent on    " required
 " vimwiki/vimwiki
-let g:vimwiki_list = [{'path': '~/vimwiki/personal', 'syntax': 'markdown', 'ext': '.md'},
-                      {'path': '~/vimwiki/work', 'syntax': 'markdown', 'ext': '.md'}]
+let g:vimwiki_list = [
+                      \{'path': '~/Dropbox/vimwiki/personal/', 
+                      \'syntax': 'markdown', 
+                      \'ext': '.md'},
+                      \{'path': '~/Dropbox/vimwiki/work/', 
+                      \'syntax': 'markdown', 
+                      \'ext': '.md'},
+                      \{'path': '~/Dropbox/vimwiki/notebook/', 
+                      \'syntax': 'markdown', 
+                      \'ext': '.md'}
+                     \]
 au BufNewFile,BufRead *.py
     \ set tabstop=4 |
     \ set softtabstop=4 |
@@ -34,14 +45,14 @@ au BufNewFile,BufRead *.py
 highlight BadWhitespace ctermbg=red guibg=darkred
 
 au BufRead,BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/ 
-
+au BufRead,BufNewFile *.tex,*.txt :setlocal spell spelllang=en_us
 set encoding=utf-8
-
+map <F2> <esc>:w<cr> ! pdflatex % && xdg-open :echo expand('%:p:h:t') <cr>
 Bundle 'Valloric/YouCompleteMe'
 
 let g:ycm_autoclose_preview_window_after_completion=1
 map <leader>g  :YcmCompleter GoToDefinitionElseDeclaration<CR>
-
+nnoremap ev :e ~/.vimrc <CR>
   
 "python with virtualenv support
 py << EOF
@@ -93,3 +104,32 @@ let g:airline_theme='silver'
 filetype plugin on
 set omnifunc=syntaxcomplete#Complete
 set directory^=$HOME/.vim/tmp//
+let g:pandoc#filetypes#handled = ["pandoc", "markdown"]
+command! -complete=file -nargs=1 Rpdf :r !pdftotext -nopgbrk <q-args> -
+nnoremap <F5> "=strftime("%H:%M")<CR>P
+inoremap <F5> <C-R>=strftime("%H:%M")<CR>
+nnoremap <F4> "=strftime("%m/%d/%y")<CR>P
+inoremap <F4> <C-R>=strftime("%m/%d/%d")<CR>
+let g:pandoc#filetypes#pandoc_markdown = 0
+command! Latex execute "silent !pdflatex % && xdg-open %:r.pdf &" | redraw! 
+map <F2> :Latex <cr>
+" REQUIRED. This makes vim invoke Latex-Suite when you open a tex file.
+filetype plugin on
+
+" IMPORTANT: win32 users will need to have 'shellslash' set so that latex
+" can be called correctly.
+set shellslash
+
+" IMPORTANT: grep will sometimes skip displaying the file name if you
+" search in a singe file. This will confuse Latex-Suite. Set your grep
+" program to always generate a file-name.
+set grepprg=grep\ -nH\ $*
+
+" OPTIONAL: This enables automatic indentation as you type.
+filetype indent on
+
+" OPTIONAL: Starting with Vim 7, the filetype of empty .tex files defaults to
+" 'plaintex' instead of 'tex', which results in vim-latex not being loaded.
+" The following changes the default filetype back to 'tex':
+let g:tex_flavor='latex'
+
