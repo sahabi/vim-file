@@ -67,7 +67,6 @@ EOF
 let python_highlight_all=1
 syntax on
 
-
 if has('gui_running')
 	set background=dark
 	colorscheme solarized
